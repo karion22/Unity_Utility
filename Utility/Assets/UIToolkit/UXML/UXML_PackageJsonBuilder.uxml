@@ -1,0 +1,103 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/UIToolkit/Style/DefaultStyle.uss?fileID=7433441132597879392&amp;guid=88a7cece5a0dd0d4dbafc1d9575fa926&amp;type=3#DefaultStyle" />
+    <engine:VisualElement style="flex-grow: 1; background-color: rgb(56, 56, 56);">
+        <engine:ScrollView>
+            <engine:VisualElement name="RequireElement" class="groupElement" style="flex-grow: 1;">
+                <engine:Label text="&lt; Require Element &gt;" class="editorTitleText" />
+                <engine:VisualElement class="marginElement" style="flex-grow: 1;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="PackageNameToggle" value="true" class="blockToggle" />
+                        <engine:TextField label="Name" placeholder-text="com.[Company].[Project]" name="PackageName" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="PackageVersionToggle" value="true" />
+                        <engine:TextField label="Version" placeholder-text="0.0.1" name="PackageVersion" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="RecommandElement" class="groupElement" style="flex-grow: 1;">
+                <engine:Label text="&lt; Recommand Element &gt;" class="editorTitleText" />
+                <engine:VisualElement class="marginElement" style="flex-grow: 1;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle value="true" name="DescriptionToggle" />
+                        <engine:TextField label="Description" name="Description" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle value="true" name="DisplayNameToggle" />
+                        <engine:TextField label="DisplayName" name="DisplayName" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle value="true" name="UnityVersionToggle" />
+                        <engine:TextField label="UnityVersion" name="UnityVersion" placeholder-text="2018.3" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="OptionalElement" class="groupElement" style="flex-grow: 1;">
+                <engine:Label text="&lt; Optional Element &gt;" class="editorTitleText" />
+                <engine:VisualElement class="marginElement" style="flex-grow: 1;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="AuthorNameToggle" />
+                        <engine:TextField label="Author-Name" name="AuthorName" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="AuthorEmailToggle" />
+                        <engine:TextField label="Author-Email" name="AuthorEmail" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="AuthorURLToggle" />
+                        <engine:TextField label="Author-URL" name="AuthorURL" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="ChangeLogURLToggle" />
+                        <engine:TextField label="ChangeLogURL" name="ChangeLogURL" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;">
+                        <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                            <engine:Toggle name="DependenciesListToggle" />
+                            <engine:Label text="Dependencies List" class="editorText" />
+                        </engine:VisualElement>
+                        <engine:ListView name="DependenciesList" show-add-remove-footer="true" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="DocumentationURLToggle" />
+                        <engine:TextField label="DocumentationURL" name="DocumentationURL" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="HideInEditorToggle" />
+                        <engine:Toggle label="HideInEditor" name="HideInEditor" value="true" class="editorText" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="KeywordsToggle" />
+                        <engine:TextField label="Keywords" name="Keywords" placeholder-text="word1, word2, word3..." class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="LicenseToggle" />
+                        <engine:TextField label="License" name="License" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="LicensesURLToggle" />
+                        <engine:TextField label="LicensesURL" name="LicensesURL" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;">
+                        <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                            <engine:Toggle name="SamplesToggle" />
+                            <engine:Label text="Samples List" class="editorText" />
+                        </engine:VisualElement>
+                        <engine:ListView name="SampleLists" show-add-remove-footer="true" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="TypeToggle" />
+                        <engine:TextField label="Type" name="Type" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Toggle name="UnityReleaseToggle" />
+                        <engine:TextField label="UnityRelease" name="UnityRelease" value="04f" class="editorText" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+        </engine:ScrollView>
+        <engine:VisualElement style="flex-grow: 1;">
+            <engine:Button text="Apply" name="ApplyBtn" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>
