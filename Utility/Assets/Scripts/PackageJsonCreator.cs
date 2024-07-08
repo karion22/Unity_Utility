@@ -1,5 +1,9 @@
+// package 파일에 여러 옵션을 설정할 수 있도록 도와주는 스크립트
+
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -59,7 +63,9 @@ public class PackageJsonCreator : EditorWindow
     #endregion
 
     #region Optional Elements
-    private bool m_AuthorToggle = false;
+    private bool m_AuthorNameToggle = false;
+    private bool m_AuthorEmailToggle = false;
+    private bool m_AuthorURLToggle = false;
     private AuthorItem m_Author = default;
 
     private bool m_LogURLToggle = false;
@@ -105,13 +111,11 @@ public class PackageJsonCreator : EditorWindow
         {
             nameToggle.value = true;
             nameToggle.SetEnabled(false);
+
+            nameToggle.RegisterValueChangedCallback((value) => { m_NameToggle = value.newValue; });
         }
 
-        var nameTextField = element.Q<TextField>("PackageName");
-        if(nameTextField != null)
-        {
-            nameTextField.RegisterValueChangedCallback((value) => { m_NameValue = value.newValue; });
-        }
+        element.Q<TextField>("PackageName")?.RegisterValueChangedCallback((value) => { m_NameValue = value.newValue; });
 
         // Package Version
         var versionToggle = element.Q<Toggle>("PackageVersionToggle");
@@ -121,20 +125,129 @@ public class PackageJsonCreator : EditorWindow
             versionToggle.SetEnabled(false);
         }
 
-        var versionTextField = element.Q<TextField>("PackageVersion");
-        if (versionTextField != null)
-        {
-            versionTextField.RegisterValueChangedCallback((value) => { m_VersionValue = value.newValue; });
-        }
+        element.Q<TextField>("PackageVersion")?.RegisterValueChangedCallback((value) => { m_VersionValue = value.newValue; }); ;
         #endregion
 
         #region Recommand Elements - 왠만하면 작성 하자.
+        // Description
+        element.Q<Toggle>("DescriptionToggle")?.RegisterValueChangedCallback((value) => { m_DescriptionToggle = value.newValue; });
+        element.Q<TextField>("Description")?.RegisterValueChangedCallback((value) => { m_Description = value.newValue; });
 
+        // DisplayName
+        element.Q<Toggle>("DisplayNameToggle")?.RegisterValueChangedCallback((value) => { m_DisplayToggle = value.newValue; });
+        element.Q<TextField>("DisplayName")?.RegisterValueChangedCallback((value) => { m_DisplayName = value.newValue; });
+
+        // UnityVersion
+        element.Q<Toggle>("UnityVersionToggle")?.RegisterValueChangedCallback((value) => { m_VersionToggle = value.newValue; });
+        element.Q<TextField>("UnityVersion")?.RegisterValueChangedCallback((value) => { m_VersionValue = value.newValue; });
         #endregion
 
         #region Optional Elements - 필요할 때만 넣자
+        element.Q<Toggle>("AuthorNameToggle")?.RegisterValueChangedCallback((value) => { m_AuthorNameToggle = value.newValue; });
+        element.Q<TextField>("AuthorName")?.RegisterValueChangedCallback((value) => { m_Author.Name = value.newValue; });
+
+        element.Q<Toggle>("AuthorEmailToggle")?.RegisterValueChangedCallback((value) => { m_AuthorEmailToggle = value.newValue; });
+        element.Q<TextField>("AuthorEmail")?.RegisterValueChangedCallback((value) => { m_Author.Email = value.newValue; });
+
+        element.Q<Toggle>("AuthorURLToggle")?.RegisterValueChangedCallback((value) => { m_AuthorURLToggle = value.newValue; });
+        element.Q<TextField>("AuthorURL")?.RegisterValueChangedCallback((value) => { m_Author.URL = value.newValue; });
+
+        element.Q<Toggle>("ChangeLogURLToggle")?.RegisterValueChangedCallback((value) => { m_LogURLToggle = value.newValue; });
+        element.Q<TextField>("ChangeLogURL")?.RegisterValueChangedCallback((value) => { m_LogURL = value.newValue; });
+
+        element.Q<Toggle>("DependenciesListToggle")?.RegisterValueChangedCallback((value) => { m_DependenciesToggle = value.newValue; });
+        //element.Q<TextField>("DependenciesList")?.RegisterValueChangedCallback((value) => { m_VersionValue = value.newValue; });
+
+        element.Q<Toggle>("DocumentationURLToggle")?.RegisterValueChangedCallback((value) => { m_DocumentToggle = value.newValue; });
+        element.Q<TextField>("DocumentationURL")?.RegisterValueChangedCallback((value) => { m_DocumentURL = value.newValue; });
+
+        element.Q<Toggle>("HideInEditorToggle")?.RegisterValueChangedCallback((value) => { m_HideInEditorToggle = value.newValue; });
+        element.Q<Toggle>("HideInEditor")?.RegisterValueChangedCallback((value) => { m_HideInEditor = value.newValue; });
+
+        element.Q<Toggle>("KeywordsToggle")?.RegisterValueChangedCallback((value) => { m_KeywordToggle = value.newValue; });
+        element.Q<TextField>("Keywords")?.RegisterValueChangedCallback((value) => { m_Keyword = value.newValue; });
+
+        element.Q<Toggle>("LicenseToggle")?.RegisterValueChangedCallback((value) => { m_LicenseToggle = value.newValue; });
+        element.Q<TextField>("License")?.RegisterValueChangedCallback((value) => { m_License = value.newValue; });
+
+        element.Q<Toggle>("LicensesURLToggle")?.RegisterValueChangedCallback((value) => { m_LicenseURLToggle = value.newValue; });
+        element.Q<TextField>("LicensesURL")?.RegisterValueChangedCallback((value) => { m_LicenseURL = value.newValue; });
+
+        element.Q<Toggle>("SamplesToggle")?.RegisterValueChangedCallback((value) => { m_SamplesToggle = value.newValue; });
+        //element.Q<TextField>("SampleLists")?.RegisterValueChangedCallback((value) => { m_VersionValue = value.newValue; });
+        
+        element.Q<Toggle>("TypeToggle")?.RegisterValueChangedCallback((value) => { m_TypeToggle = value.newValue; });
+        element.Q<TextField>("Type")?.RegisterValueChangedCallback((value) => { m_Type = value.newValue; });
+
+        element.Q<Toggle>("UnityReleaseToggle")?.RegisterValueChangedCallback((value) => { m_UnityReleaseToggle = value.newValue; });
+        element.Q<TextField>("UnityRelease")?.RegisterValueChangedCallback((value) => { m_UnityRelease = value.newValue; });
         #endregion
 
+        var applyBtn = element.Q<Button>("ApplyBtn");
+        if(applyBtn != null)
+        {
+            applyBtn.clicked += () => {
+                if(CheckRequireElements())
+                {
+                    Apply();
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "필수 요소가 비어있습니다.", "Confirm");
+                }
+            };
+        }
+
         rootVisualElement.Add(element);
+    }
+
+    private bool CheckRequireElements()
+    {
+        return (string.IsNullOrEmpty(m_NameValue) == false && string.IsNullOrEmpty(m_VersionValue) == false);
+    }
+
+    private void Apply()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append("{");
+        #region Require
+        if (m_NameToggle)
+        {
+            sb.AppendLine();
+            sb.AppendFormat("\"name\": \"{0}\"", m_NameValue);
+        }
+
+        if(m_VersionToggle)
+            AppendStringItem(sb, "version", m_VersionValue);
+        #endregion
+
+        #region Recommand
+        if (m_DescriptionToggle)
+            AppendStringItem(sb, "description", m_Description);
+
+        if (m_DisplayToggle)
+            AppendStringItem(sb, "displayName", m_DisplayName);
+
+        if (m_UnityVersionToggle)
+            AppendStringItem(sb, "unity", m_UnityVersion);
+        #endregion
+
+        #region Optional
+
+        #endregion
+
+        //
+        sb.AppendLine();
+        sb.Append("}");
+        File.WriteAllText(UnityEngine.Application.dataPath + "/Test/test.json", sb.ToString());
+    }
+
+    private void AppendStringItem(StringBuilder inBuilder, string inName, string inValue, bool bAddComma = true)
+    {
+        if(bAddComma) inBuilder.Append(",");
+
+        inBuilder.AppendLine();
+        inBuilder.AppendFormat("\"{0}\": \"{1}\"", inName, inValue);
     }
 }

@@ -37,7 +37,7 @@
                 <engine:VisualElement class="marginElement" style="flex-grow: 1;">
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
                         <engine:Toggle name="AuthorNameToggle" />
-                        <engine:TextField label="Author-Name" name="AuthorName" class="editorText" style="flex-grow: 1;" />
+                        <engine:TextField label="Author-Name" name="AuthorName" class="editorText" style="flex-grow: 1; height: 38px;" />
                     </engine:VisualElement>
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
                         <engine:Toggle name="AuthorEmailToggle" />

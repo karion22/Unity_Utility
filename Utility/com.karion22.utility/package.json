@@ -1,14 +1,4 @@
 {
-  "name": "com.karion22.utility",
-  "version": "0.0.1",
-  "displayName": "Utility Package",
-  "description": "This is common utility package with singleton, etc...",
-  "unity": "2019.1",
-  "unityRelease": "0b5",
-  "dependencies": { },
-  "keywords": [ "Singleton", "Utility" ],
-  "author": {
-    "name": "Karion22",
-    "email": "karion22@naver.com",
-  }
+"name": "com.karion22.utility",
+"version": "0.0.1"
 }
