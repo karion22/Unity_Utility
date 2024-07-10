@@ -1,0 +1,12 @@
+{
+"name": "com.[Company].[Project]",
+"version": "0.0.1",
+"description": "",
+"displayName": "",
+"unity": "2018.3",
+"samples":[
+"displayName": "1",
+"description": "1",
+"path": "2"
+]
+}

@@ -1,6 +1,7 @@
 .editorText {
     color: rgb(199, 199, 199);
     -unity-text-align: middle-left;
+    flex-grow: 1;
 }
 
 .editorTitleText {
@@ -32,4 +33,23 @@
     margin-right: 8px;
     margin-bottom: 8px;
     margin-left: 8px;
+}
+
+.background {
+    background-color: rgb(56, 56, 56);
+}
+
+.itemHeaderText {
+    -unity-font-style: normal;
+    color: rgb(199, 199, 199);
+    margin-left: 8px;
+    margin-right: 8px;
+    width: 120px;
+    -unity-text-align: middle-left;
+}
+
+.rightBottomAlign {
+    flex-grow: 1;
+    flex-direction: row-reverse;
+    margin-right: 16px;
 }
