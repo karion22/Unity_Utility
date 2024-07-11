@@ -26,7 +26,7 @@ public class PackageJsonCreator : EditorWindow
         public List<sDependencyItemWrapper> dependencies;
         public string documentationUrl;
         public bool hideInEditor;
-        public string keywords;
+        public string[] keywords;
         public string license;
         public string licensesUrl;
         public List<sSampleItemWrapper> samples;
@@ -204,7 +204,6 @@ public class PackageJsonCreator : EditorWindow
     private bool m_SamplesToggle = false;
     private ListView m_SampleField = null;
     private List<SampleItem> m_Samples = new List<SampleItem>();
-    private VisualTreeAsset m_SampleItemAsset = null;
 
     private Toggle m_TypeToggleField = null;
     private bool m_TypeToggle = false;
@@ -425,19 +424,29 @@ public class PackageJsonCreator : EditorWindow
 
             m_DependenciesField.makeItem = () => item.CloneTree();
             m_DependenciesField.bindItem = (element, index) => {
-                element.Q<TextField>("NameField").RegisterValueChangedCallback((value) => 
+                var nameField = element.Q<TextField>("NameField");
+                if(nameField != null)
                 {
-                    DependencyItem item = m_Dependencies[index];
-                    item.Name = value.newValue;
-                    m_Dependencies[index] = item;
-                });
+                    nameField.value = m_Dependencies[index].Name;
+                    nameField.RegisterValueChangedCallback((value) =>
+                    {
+                        DependencyItem item = m_Dependencies[index];
+                        item.Name = value.newValue;
+                        m_Dependencies[index] = item;
+                    });
+                }
 
-                element.Q<TextField>("VersionField").RegisterValueChangedCallback((value) =>
+                var versionField = element.Q<TextField>("VersionField");
+                if(versionField != null)
                 {
-                    DependencyItem item = m_Dependencies[index];
-                    item.Version = value.newValue;
-                    m_Dependencies[index] = item;
-                });
+                    versionField.value = m_Dependencies[index].Version;
+                    versionField.RegisterValueChangedCallback((value) =>
+                    {
+                        DependencyItem item = m_Dependencies[index];
+                        item.Version = value.newValue;
+                        m_Dependencies[index] = item;
+                    });
+                }
             };
 
             m_DependenciesField.itemsSource = m_Dependencies;
@@ -528,41 +537,48 @@ public class PackageJsonCreator : EditorWindow
         m_SampleField = element.Q<ListView>("SampleLists");
         if (m_SampleField != null)
         {
-            m_SampleItemAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIToolkit/UXML/UXML_PackageJsonSampleItem.uxml");
+            var treeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIToolkit/UXML/UXML_PackageJsonSampleItem.uxml");
 
-            m_SampleField.makeItem = () => m_SampleItemAsset.CloneTree();
+            m_SampleField.makeItem = () => treeAsset.CloneTree();
             m_SampleField.bindItem = (element, index) => {
-                element.Q<TextField>("DisplayName").RegisterValueChangedCallback((value) =>
+                var displayName = element.Q<TextField>("DisplayName");
+                if(displayName != null)
                 {
-                    SampleItem item = m_Samples[index];
-                    item.DisplayName = value.newValue;
-                    m_Samples[index] = item;
-                });
+                    displayName.value = m_Samples[index].DisplayName;
+                    displayName.RegisterValueChangedCallback((value) =>
+                    {
+                        SampleItem item = m_Samples[index];
+                        item.DisplayName = value.newValue;
+                        m_Samples[index] = item;
+                    });
+                }
 
-                element.Q<TextField>("Description").RegisterValueChangedCallback((value) =>
+                var description = element.Q<TextField>("Description");
+                if(description != null)
                 {
-                    SampleItem item = m_Samples[index];
-                    item.Desciption = value.newValue;
-                    m_Samples[index] = item;
-                });
+                    description.value = m_Samples[index].Desciption;
+                    description.RegisterValueChangedCallback((value) =>
+                    {
+                        SampleItem item = m_Samples[index];
+                        item.Desciption = value.newValue;
+                        m_Samples[index] = item;
+                    });
+                }
 
-                element.Q<TextField>("Path").RegisterValueChangedCallback((value) =>
+                var path = element.Q<TextField>("Path");
+                if(path != null)
                 {
-                    SampleItem item = m_Samples[index];
-                    item.Path = value.newValue;
-                    m_Samples[index] = item;
-                });
-
+                    path.value = m_Samples[index].Path;
+                    path.RegisterValueChangedCallback((value) =>
+                    {
+                        SampleItem item = m_Samples[index];
+                        item.Path = value.newValue;
+                        m_Samples[index] = item;
+                    });
+                }
             };
 
             m_SampleField.itemsSource = m_Samples;
-            m_SampleField.itemsAdded += (indices) => {
-                foreach(var index in indices)
-                {
-                }
-
-                m_SampleField.RefreshItems();
-            };
             m_SampleField.selectionType = SelectionType.None;
             m_SampleField.RefreshItems();
         }
@@ -698,12 +714,15 @@ public class PackageJsonCreator : EditorWindow
             if(m_DependenciesToggleField.value)
             {
                 m_Dependencies.Clear();
+                m_DependenciesField.Clear();
+
                 foreach(var item in data.dependencies)
                 {
                     DependencyItem newItem = new DependencyItem();
                     newItem.Convert(item);
                     m_Dependencies.Add(newItem);
                 }
+                m_DependenciesField.RefreshItems();
             }
 
             m_DocumentURLToggleField.value = (string.IsNullOrEmpty(data.documentationUrl) == false);
@@ -713,9 +732,18 @@ public class PackageJsonCreator : EditorWindow
             //m_HideInEditorToggleField.value = data.hideInEditor;
             //m_HideInEditorField.value = data.hideInEditor;
 
-            m_KeywordToggleField.value = (string.IsNullOrEmpty(data.keywords) == false);
+            m_KeywordToggleField.value = (data.keywords.Length > 0);
             if(m_KeywordToggleField.value)
-                m_KeywordField.value = data.keywords;
+            {
+                StringBuilder keywordBuilder = new StringBuilder();
+                foreach(var keyword in  data.keywords)
+                {
+                    if (keywordBuilder.Length > 0)
+                        keywordBuilder.Append(",");
+                    keywordBuilder.Append(keyword);
+                }
+                m_KeywordField.value = keywordBuilder.ToString();
+            }
 
             m_LicenseToggleField.value = (string.IsNullOrEmpty(data.license) == false);
             if(m_LicenseToggleField.value)
@@ -729,13 +757,15 @@ public class PackageJsonCreator : EditorWindow
             if(m_SamplesToggleField.value)
             {
                 m_Samples.Clear();
-                foreach(var item in data.samples)
+                m_SampleField.Clear();
+
+                foreach (var item in data.samples)
                 {
                     SampleItem newItem = new SampleItem();
                     newItem.Convert(item);;
                     m_Samples.Add(newItem);
                 }
-                m_SampleField.Rebuild();
+                m_SampleField.RefreshItems();
             }
 
             m_TypeToggleField.value = (string.IsNullOrEmpty(data.type) == false);
@@ -906,9 +936,8 @@ public class PackageJsonCreator : EditorWindow
     private void AppendArrayItemBeginGroup(StringBuilder inBuilder, bool bAddComma = true)
     {
         AppendComma(inBuilder, bAddComma);
-        inBuilder.Append("{");
-
         AppendLine(inBuilder);
+        inBuilder.Append("{");
     }
 
     private void AppendArrayItemEndGroup(StringBuilder inBuilder)

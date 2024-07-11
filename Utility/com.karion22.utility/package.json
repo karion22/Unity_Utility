@@ -11,13 +11,17 @@
 },
 "changelogUrl": "ChangeLog_URL",
 "documentationUrl": "Document_URL",
+"keywords":[
+"word1",
+"word2"
+],
 "license": "MIT",
 "licensesUrl": "MIT.com",
-"samples":[{
-
-"displayName": "S1",
-"description": "D1",
-"path": "P1"}
+"samples":[
+{
+"displayName": "Test",
+"description": "2",
+"path": "Test"}
 ],
 "type": "Tesss",
 "unityRelease": "6f1"
