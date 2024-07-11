@@ -10,7 +10,7 @@
                         <engine:TextField name="FolderName" label="Folder Path" class="editorText" style="flex-grow: 1;" />
                         <engine:Button text="Find" name="FolderBtn" style="width: 120px;" />
                     </engine:VisualElement>
-                    <engine:TextField label="FileName" value="pacakge.json" name="FileName" class="editorText" />
+                    <engine:TextField label="FileName" value="package.json" name="FileName" class="editorText" />
                     <engine:Toggle label="PrettyPrint" name="PrettyPrint" value="true" class="editorText" />
                 </engine:VisualElement>
             </engine:VisualElement>
@@ -77,7 +77,7 @@
                         <engine:Toggle name="DocumentationURLToggle" />
                         <engine:TextField label="DocumentationURL" name="DocumentationURL" class="editorText" style="flex-grow: 1;" />
                     </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; display: none;">
                         <engine:Toggle name="HideInEditorToggle" />
                         <engine:Toggle label="HideInEditor" name="HideInEditor" value="true" class="editorText" />
                     </engine:VisualElement>

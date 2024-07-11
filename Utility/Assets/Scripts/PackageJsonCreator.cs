@@ -1,8 +1,10 @@
 // package 파일에 여러 옵션을 설정할 수 있도록 도와주는 스크립트
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -10,12 +12,64 @@ using UnityEngine.UIElements;
 
 public class PackageJsonCreator : EditorWindow
 {
+    #region Wrapper
+    [System.Serializable]
+    public struct sDataWrapper
+    {
+        public string name;
+        public string version;
+        public string description;
+        public string displayName;
+        public string unity;
+        public sAuthorItemWrapper author;
+        public string changelogUrl;
+        public List<sDependencyItemWrapper> dependencies;
+        public string documentationUrl;
+        public bool hideInEditor;
+        public string keywords;
+        public string license;
+        public string licensesUrl;
+        public List<sSampleItemWrapper> samples;
+        public string type;
+        public string unityRelease;
+    }
+
+    [System.Serializable]
+    public struct sAuthorItemWrapper
+    {
+        public string name;
+        public string email;
+        public string url;
+    }
+
+    [System.Serializable]
+    public struct sDependencyItemWrapper
+    {
+        public string key;
+        public string value;
+    }
+
+    [System.Serializable]
+    public struct sSampleItemWrapper
+    {
+        public string displayName;
+        public string description;
+        public string path;
+    }
+    #endregion
+
     #region Sub Items
     [System.Serializable]
     public struct DependencyItem
     {
         public string Name;
         public string Version;
+
+        public void Convert(sDependencyItemWrapper inWrapper)
+        {
+            Name = inWrapper.key;
+            Version = inWrapper.value;
+        }
     }
 
     [System.Serializable]
@@ -24,6 +78,13 @@ public class PackageJsonCreator : EditorWindow
         public string Name;
         public string Email;
         public string URL;
+
+        public void Convert(sAuthorItemWrapper inWrapper)
+        {
+            Name = inWrapper.name;
+            Email = inWrapper.email;
+            URL = inWrapper.url;
+        }
     }
 
     [System.Serializable]
@@ -32,6 +93,13 @@ public class PackageJsonCreator : EditorWindow
         public string DisplayName;
         public string Desciption;
         public string Path;
+
+        public void Convert(sSampleItemWrapper inWrapper)
+        {
+            DisplayName = inWrapper.displayName;
+            Desciption = inWrapper.description;
+            Path = inWrapper.path;
+        }
     }
     #endregion
 
@@ -45,7 +113,7 @@ public class PackageJsonCreator : EditorWindow
 
     #region File Elements
     private ObjectField m_FileSourceField = null;
-    private Object m_FileSource = null;
+    private UnityEngine.Object m_FileSource = null;
     private TextField m_FolderField = null;
     private string m_FolderName = string.Empty;
     private TextField m_FileField = null;
@@ -55,24 +123,29 @@ public class PackageJsonCreator : EditorWindow
     #endregion
 
     #region Require Elements
+    private Toggle m_PackageNameToggleField = null;
     private bool m_PackageNameToggle = true;
     private TextField m_PackageNameField = null;
     private string m_PackageNameValue = string.Empty;
 
+    private Toggle m_PackageVersionToggleField = null;
     private bool m_PackageVersionToggle = true;
     private TextField m_PackageVersionField = null;
     private string m_PackageVersionValue = string.Empty;
     #endregion
 
     #region Recommand Elements
+    private Toggle m_DescriptionToggleField = null;
     private bool m_DescriptionToggle = true;
     private TextField m_DescriptionField = null;
     private string m_Description = string.Empty;
 
+    private Toggle m_DisplayToggleField = null;
     private bool m_DisplayToggle = true;
     private TextField m_DisplayField = null;
     private string m_DisplayName = string.Empty;
 
+    private Toggle m_UnityVersionToggleField = null;
     private bool m_UnityVersionToggle = true;
     private TextField m_UnityVersionField = null;
     private string m_UnityVersion = string.Empty;
@@ -80,49 +153,65 @@ public class PackageJsonCreator : EditorWindow
 
     #region Optional Elements
     private TextField m_AuthorNameField = null;
+    private Toggle m_AuthorNameToggleField = null;
     private bool m_AuthorNameToggle = false;
     private TextField m_AuthorEmailField = null;
+    private Toggle m_AuthorEmailToggleField = null;
     private bool m_AuthorEmailToggle = false;
     private TextField m_AuthorURLField = null;
+    private Toggle m_AuthorURLToggleField = null;
     private bool m_AuthorURLToggle = false;
     private AuthorItem m_Author = default;
 
+    private Toggle m_LogURLToggleField = null;
     private bool m_LogURLToggle = false;
-    private TextField m_LogField = null;
+    private TextField m_LogURLField = null;
     private string m_LogURL = string.Empty;
 
+    private Toggle m_DependenciesToggleField = null;
     private bool m_DependenciesToggle = false;
     private ListView m_DependenciesField = null;
     private List<DependencyItem> m_Dependencies = new List<DependencyItem>();
 
-    private bool m_DocumentToggle = false;
-    private TextField m_DocumentField = null;
+    private Toggle m_DocumentURLToggleField = null;
+    private bool m_DocumentURLToggle = false;
+    private TextField m_DocumentURLField = null;
     private string m_DocumentURL = string.Empty;
 
+    /*
+    private Toggle m_HideInEditorToggleField = null;
     private bool m_HideInEditorToggle = false;
     private Toggle m_HideInEditorField = null;
     private bool m_HideInEditor = true;
+    */
 
+    private Toggle m_KeywordToggleField = null;
     private bool m_KeywordToggle = false;
     private TextField m_KeywordField = null;
     private string m_Keyword = string.Empty;
 
+    private Toggle m_LicenseToggleField = null;
     private bool m_LicenseToggle = false;
     private TextField m_LicenseField = null;
     private string m_License = string.Empty;
 
+    private Toggle m_LicenseURLToggleField = null;
     private bool m_LicenseURLToggle = false;
     private TextField m_LicenseURLField = null;
     private string m_LicenseURL = string.Empty;
 
+    private Toggle m_SamplesToggleField = null;
     private bool m_SamplesToggle = false;
     private ListView m_SampleField = null;
     private List<SampleItem> m_Samples = new List<SampleItem>();
+    private VisualTreeAsset m_SampleItemAsset = null;
 
+    private Toggle m_TypeToggleField = null;
     private bool m_TypeToggle = false;
     private TextField m_TypeField = null;
     private string m_Type = string.Empty;
 
+    private Toggle m_UnityReleaseToggleField = null;
     private bool m_UnityReleaseToggle = false;
     private TextField m_UnityReleaseField = null;
     private string m_UnityRelease = string.Empty;
@@ -187,13 +276,13 @@ public class PackageJsonCreator : EditorWindow
 
         #region Require Elements - 절대 바뀔 수 없다.
         // Package Name
-        var nameToggle = element.Q<Toggle>("PackageNameToggle");
-        if (nameToggle != null)
+        m_PackageNameToggleField = element.Q<Toggle>("PackageNameToggle");
+        if (m_PackageNameToggleField != null)
         {
-            nameToggle.value = true;
-            nameToggle.SetEnabled(false);
+            m_PackageNameToggleField.value = true;
+            m_PackageNameToggleField.SetEnabled(false);
 
-            nameToggle.RegisterValueChangedCallback((value) => { m_PackageNameToggle = value.newValue; });
+            m_PackageNameToggleField.RegisterValueChangedCallback((value) => { m_PackageNameToggle = value.newValue; });
         }
 
         m_PackageNameField = element.Q<TextField>("PackageName");
@@ -204,11 +293,11 @@ public class PackageJsonCreator : EditorWindow
         }
 
         // Package Version
-        var packageVersionToggle = element.Q<Toggle>("PackageVersionToggle");
-        if (packageVersionToggle != null)
+        m_PackageVersionToggleField = element.Q<Toggle>("PackageVersionToggle");
+        if (m_PackageVersionToggleField != null)
         {
-            packageVersionToggle.value = true;
-            packageVersionToggle.SetEnabled(false);
+            m_PackageVersionToggleField.value = true;
+            m_PackageVersionToggleField.SetEnabled(false);
         }
 
         m_PackageVersionField = element.Q<TextField>("PackageVersion");
@@ -221,11 +310,11 @@ public class PackageJsonCreator : EditorWindow
 
         #region Recommand Elements - 왠만하면 작성 하자.
         // Description
-        var descriptionToggle = element.Q<Toggle>("DescriptionToggle");
-        if(descriptionToggle != null)
+        m_DescriptionToggleField = element.Q<Toggle>("DescriptionToggle");
+        if(m_DescriptionToggleField != null)
         {
-            m_DependenciesToggle = descriptionToggle.value;
-            descriptionToggle.RegisterValueChangedCallback((value) => { m_DescriptionToggle = value.newValue; });
+            m_DependenciesToggle = m_DescriptionToggleField.value;
+            m_DescriptionToggleField.RegisterValueChangedCallback((value) => { m_DescriptionToggle = value.newValue; });
         }
 
         m_DescriptionField = element.Q<TextField>("Description");
@@ -236,11 +325,11 @@ public class PackageJsonCreator : EditorWindow
         }
 
         // DisplayName
-        var displayNameToggle = element.Q<Toggle>("DisplayNameToggle");
-        if(displayNameToggle != null)
+        m_DisplayToggleField = element.Q<Toggle>("DisplayNameToggle");
+        if(m_DisplayToggleField != null)
         {
-            m_DisplayToggle = displayNameToggle.value;
-            displayNameToggle.RegisterValueChangedCallback((value) => { m_DisplayToggle = value.newValue; });
+            m_DisplayToggle = m_DisplayToggleField.value;
+            m_DisplayToggleField.RegisterValueChangedCallback((value) => { m_DisplayToggle = value.newValue; });
         }
 
         m_DisplayField = element.Q<TextField>("DisplayName");
@@ -251,11 +340,11 @@ public class PackageJsonCreator : EditorWindow
         }
 
         // UnityVersion
-        var unityVersionToggle = element.Q<Toggle>("UnityVersionToggle");
-        if(unityVersionToggle != null)
+        m_UnityVersionToggleField = element.Q<Toggle>("UnityVersionToggle");
+        if(m_UnityVersionToggleField != null)
         {
-            m_PackageVersionToggle = unityVersionToggle.value;
-            unityVersionToggle.RegisterValueChangedCallback((value) => { m_PackageVersionToggle = value.newValue; });
+            m_PackageVersionToggle = m_UnityVersionToggleField.value;
+            m_UnityVersionToggleField.RegisterValueChangedCallback((value) => { m_PackageVersionToggle = value.newValue; });
         }
 
         m_UnityVersionField = element.Q<TextField>("UnityVersion");
@@ -270,17 +359,17 @@ public class PackageJsonCreator : EditorWindow
         {
             recommandBtn.clickable = null;
             recommandBtn.clicked += () => {
-                descriptionToggle.value = !descriptionToggle.value;
-                displayNameToggle.value = !displayNameToggle.value;
-                unityVersionToggle.value = !unityVersionToggle.value;
+                m_DescriptionToggleField.value = !m_DescriptionToggleField.value;
+                m_DisplayToggleField.value = !m_DisplayToggleField.value;
+                m_UnityVersionToggleField.value = !m_UnityVersionToggleField.value;
             };
         }
         #endregion
 
         #region Optional Elements - 필요할 때만 넣자
-        var authorNameToggle = element.Q<Toggle>("AuthorNameToggle");
-        if(authorNameToggle != null)
-            authorNameToggle.RegisterValueChangedCallback((value) => { m_AuthorNameToggle = value.newValue; });
+        m_AuthorNameToggleField = element.Q<Toggle>("AuthorNameToggle");
+        if(m_AuthorNameToggleField != null)
+            m_AuthorNameToggleField.RegisterValueChangedCallback((value) => { m_AuthorNameToggle = value.newValue; });
 
         m_AuthorNameField = element.Q<TextField>("AuthorName");
         if(m_AuthorNameField != null)
@@ -289,9 +378,9 @@ public class PackageJsonCreator : EditorWindow
             m_AuthorNameField.RegisterValueChangedCallback((value) => { m_Author.Name = value.newValue; });
         }
 
-        var authorEmailToggle = element.Q<Toggle>("AuthorEmailToggle");
-        if(authorEmailToggle != null)
-            authorEmailToggle.RegisterValueChangedCallback((value) => { m_AuthorEmailToggle = value.newValue; });
+        m_AuthorEmailToggleField = element.Q<Toggle>("AuthorEmailToggle");
+        if(m_AuthorEmailToggleField != null)
+            m_AuthorEmailToggleField.RegisterValueChangedCallback((value) => { m_AuthorEmailToggle = value.newValue; });
 
         m_AuthorEmailField = element.Q<TextField>("AuthorEmail");
         if(m_AuthorEmailField != null)
@@ -300,9 +389,9 @@ public class PackageJsonCreator : EditorWindow
             m_AuthorEmailField.RegisterValueChangedCallback((value) => { m_Author.Email = value.newValue; });
         }
 
-        var authorURLToggle = element.Q<Toggle>("AuthorURLToggle");
-        if(authorURLToggle != null)
-            authorURLToggle.RegisterValueChangedCallback((value) => { m_AuthorURLToggle = value.newValue; });
+        m_AuthorURLToggleField = element.Q<Toggle>("AuthorURLToggle");
+        if(m_AuthorURLToggleField != null)
+            m_AuthorURLToggleField.RegisterValueChangedCallback((value) => { m_AuthorURLToggle = value.newValue; });
 
         m_AuthorURLField = element.Q<TextField>("AuthorURL");
         if (m_AuthorURLField != null)
@@ -311,22 +400,22 @@ public class PackageJsonCreator : EditorWindow
             m_AuthorURLField.RegisterValueChangedCallback((value) => { m_Author.URL = value.newValue; });
         }
 
-        var logURLToggle = element.Q<Toggle>("ChangeLogURLToggle");
-        if(logURLToggle != null)
-            logURLToggle.RegisterValueChangedCallback((value) => { m_LogURLToggle = value.newValue; });
+        m_LogURLToggleField = element.Q<Toggle>("ChangeLogURLToggle");
+        if(m_LogURLToggleField != null)
+            m_LogURLToggleField.RegisterValueChangedCallback((value) => { m_LogURLToggle = value.newValue; });
 
-        m_LogField = element.Q<TextField>("ChangeLogURL");
-        if(m_LogField != null)
+        m_LogURLField = element.Q<TextField>("ChangeLogURL");
+        if(m_LogURLField != null)
         {
-            m_LogURL = m_LogField.value;
-            m_LogField.RegisterValueChangedCallback((value) => { m_LogURL = value.newValue; });
+            m_LogURL = m_LogURLField.value;
+            m_LogURLField.RegisterValueChangedCallback((value) => { m_LogURL = value.newValue; });
         }
 
-        var dependenciesToggle = element.Q<Toggle>("DependenciesListToggle");
-        if(dependenciesToggle != null)
+        m_DependenciesToggleField = element.Q<Toggle>("DependenciesListToggle");
+        if(m_DependenciesToggleField != null)
         {
-            m_DependenciesToggle = dependenciesToggle.value;
-            dependenciesToggle.RegisterValueChangedCallback((value) => { m_DependenciesToggle = value.newValue; });
+            m_DependenciesToggle = m_DependenciesToggleField.value;
+            m_DependenciesToggleField.RegisterValueChangedCallback((value) => { m_DependenciesToggle = value.newValue; });
         }
 
         m_DependenciesField = element.Q<ListView>("DependenciesList");
@@ -357,25 +446,26 @@ public class PackageJsonCreator : EditorWindow
             m_DependenciesField.RefreshItems();
         }
 
-        var documentURLToggle = element.Q<Toggle>("DocumentationURLToggle");
-        if(documentURLToggle != null)
+        m_DocumentURLToggleField = element.Q<Toggle>("DocumentationURLToggle");
+        if(m_DocumentURLToggleField != null)
         {
-            m_DocumentToggle = documentURLToggle.value;
-            documentURLToggle.RegisterValueChangedCallback((value) => { m_DocumentToggle = value.newValue; });
+            m_DocumentURLToggle = m_DocumentURLToggleField.value;
+            m_DocumentURLToggleField.RegisterValueChangedCallback((value) => { m_DocumentURLToggle = value.newValue; });
         }
 
-        m_DocumentField = element.Q<TextField>("DocumentationURL");
-        if(m_DocumentField != null)
+        m_DocumentURLField = element.Q<TextField>("DocumentationURL");
+        if(m_DocumentURLField != null)
         {
-            m_DocumentURL = m_DocumentField.value;
-            m_DocumentField.RegisterValueChangedCallback((value) => { m_DocumentURL = value.newValue; });
-        }        
+            m_DocumentURL = m_DocumentURLField.value;
+            m_DocumentURLField.RegisterValueChangedCallback((value) => { m_DocumentURL = value.newValue; });
+        }
 
-        var hideInEditorToggle = element.Q<Toggle>("HideInEditorToggle");
-        if(hideInEditorToggle != null)
+        /*
+        m_HideInEditorToggleField = element.Q<Toggle>("HideInEditorToggle");
+        if(m_HideInEditorToggleField != null)
         {
-            m_HideInEditorToggle = hideInEditorToggle.value;
-            hideInEditorToggle.RegisterValueChangedCallback((value) => { m_HideInEditorToggle = value.newValue; });
+            m_HideInEditorToggle = m_HideInEditorToggleField.value;
+            m_HideInEditorToggleField.RegisterValueChangedCallback((value) => { m_HideInEditorToggle = value.newValue; });
         }
 
         m_HideInEditorField = element.Q<Toggle>("HideInEditor");
@@ -384,12 +474,13 @@ public class PackageJsonCreator : EditorWindow
             m_HideInEditor = m_HideInEditorField.value;
             m_HideInEditorField.RegisterValueChangedCallback((value) => { m_HideInEditor = value.newValue; });
         }
+        */
 
-        var keywordToggle = element.Q<Toggle>("KeywordsToggle");
-        if(keywordToggle != null)
+        m_KeywordToggleField = element.Q<Toggle>("KeywordsToggle");
+        if(m_KeywordToggleField != null)
         {
-            m_KeywordToggle = keywordToggle.value;
-            keywordToggle.RegisterValueChangedCallback((value) => { m_KeywordToggle = value.newValue; });
+            m_KeywordToggle = m_KeywordToggleField.value;
+            m_KeywordToggleField.RegisterValueChangedCallback((value) => { m_KeywordToggle = value.newValue; });
         }
 
         m_KeywordField = element.Q<TextField>("Keywords");
@@ -397,13 +488,13 @@ public class PackageJsonCreator : EditorWindow
         {
             m_Keyword = m_KeywordField.value;
             m_KeywordField.RegisterValueChangedCallback((value) => { m_Keyword = value.newValue; });
-        }        
+        }
 
-        var licenseToggle = element.Q<Toggle>("LicenseToggle");
-        if(licenseToggle != null)
+        m_LicenseToggleField = element.Q<Toggle>("LicenseToggle");
+        if(m_LicenseToggleField != null)
         {
-            m_LicenseToggle = licenseToggle.value;
-            licenseToggle.RegisterValueChangedCallback((value) => { m_LicenseToggle = value.newValue; });
+            m_LicenseToggle = m_LicenseToggleField.value;
+            m_LicenseToggleField.RegisterValueChangedCallback((value) => { m_LicenseToggle = value.newValue; });
         }
 
         m_LicenseField = element.Q<TextField>("License");
@@ -411,13 +502,13 @@ public class PackageJsonCreator : EditorWindow
         {
             m_License = m_LicenseField.value;
             m_LicenseField.RegisterValueChangedCallback((value) => { m_License = value.newValue; });
-        }        
+        }
 
-        var licenseURLToggle = element.Q<Toggle>("LicensesURLToggle");
-        if(licenseURLToggle != null)
+        m_LicenseURLToggleField = element.Q<Toggle>("LicensesURLToggle");
+        if(m_LicenseURLToggleField != null)
         {
-            m_LicenseURLToggle = licenseURLToggle.value;
-            licenseURLToggle.RegisterValueChangedCallback((value) => { m_LicenseURLToggle = value.newValue; });
+            m_LicenseURLToggle = m_LicenseURLToggleField.value;
+            m_LicenseURLToggleField.RegisterValueChangedCallback((value) => { m_LicenseURLToggle = value.newValue; });
         }
 
         m_LicenseURLField = element.Q<TextField>("LicensesURL");
@@ -427,19 +518,19 @@ public class PackageJsonCreator : EditorWindow
             m_LicenseURLField.RegisterValueChangedCallback((value) => { m_LicenseURL = value.newValue; });
         }
 
-        var sampleToggle = element.Q<Toggle>("SamplesToggle");
-        if(sampleToggle != null)
+        m_SamplesToggleField = element.Q<Toggle>("SamplesToggle");
+        if(m_SamplesToggleField != null)
         {
-            m_SamplesToggle = sampleToggle.value;
-            sampleToggle.RegisterValueChangedCallback((value) => { m_SamplesToggle = value.newValue; });
+            m_SamplesToggle = m_SamplesToggleField.value;
+            m_SamplesToggleField.RegisterValueChangedCallback((value) => { m_SamplesToggle = value.newValue; });
         }
 
         m_SampleField = element.Q<ListView>("SampleLists");
         if (m_SampleField != null)
         {
-            var item = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIToolkit/UXML/UXML_PackageJsonSampleItem.uxml");
+            m_SampleItemAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIToolkit/UXML/UXML_PackageJsonSampleItem.uxml");
 
-            m_SampleField.makeItem = () => item.CloneTree();
+            m_SampleField.makeItem = () => m_SampleItemAsset.CloneTree();
             m_SampleField.bindItem = (element, index) => {
                 element.Q<TextField>("DisplayName").RegisterValueChangedCallback((value) =>
                 {
@@ -465,16 +556,22 @@ public class PackageJsonCreator : EditorWindow
             };
 
             m_SampleField.itemsSource = m_Samples;
+            m_SampleField.itemsAdded += (indices) => {
+                foreach(var index in indices)
+                {
+                }
+
+                m_SampleField.RefreshItems();
+            };
             m_SampleField.selectionType = SelectionType.None;
-            m_SampleField.itemIndexChanged += ((prevValue, newValue) => { });
             m_SampleField.RefreshItems();
         }
 
-        var typeToggle = element.Q<Toggle>("TypeToggle");
-        if(typeToggle != null)
+        m_TypeToggleField = element.Q<Toggle>("TypeToggle");
+        if(m_TypeToggleField != null)
         {
-            m_TypeToggle = typeToggle.value;
-            typeToggle.RegisterValueChangedCallback((value) => { m_TypeToggle = value.newValue; });
+            m_TypeToggle = m_TypeToggleField.value;
+            m_TypeToggleField.RegisterValueChangedCallback((value) => { m_TypeToggle = value.newValue; });
         }
 
         m_TypeField = element.Q<TextField>("Type");
@@ -483,11 +580,11 @@ public class PackageJsonCreator : EditorWindow
             m_TypeField.RegisterValueChangedCallback((value) => { m_Type = value.newValue; });
         }
 
-        var unityReleaseToggle = element.Q<Toggle>("UnityReleaseToggle");
-        if(unityReleaseToggle != null)
+        m_UnityReleaseToggleField = element.Q<Toggle>("UnityReleaseToggle");
+        if(m_UnityReleaseToggleField != null)
         {
-            m_UnityReleaseToggle = unityReleaseToggle.value;
-            unityReleaseToggle.RegisterValueChangedCallback((value) => { m_UnityReleaseToggle = value.newValue; });
+            m_UnityReleaseToggle = m_UnityReleaseToggleField.value;
+            m_UnityReleaseToggleField.RegisterValueChangedCallback((value) => { m_UnityReleaseToggle = value.newValue; });
         }
 
         m_UnityReleaseField = element.Q<TextField>("UnityRelease");
@@ -502,20 +599,20 @@ public class PackageJsonCreator : EditorWindow
         {
             optionalBtn.clickable = null;
             optionalBtn.clicked += () => {
-                authorNameToggle.value = !authorNameToggle.value;
-                authorEmailToggle.value = !authorEmailToggle.value;
-                authorURLToggle.value = !authorURLToggle.value;
+                m_AuthorNameToggleField.value = !m_AuthorNameToggleField.value;
+                m_AuthorEmailToggleField.value = !m_AuthorEmailToggleField.value;
+                m_AuthorURLToggleField.value = !m_AuthorURLToggleField.value;
 
-                logURLToggle.value = !logURLToggle.value;
-                dependenciesToggle.value = !dependenciesToggle.value;
-                documentURLToggle.value = !documentURLToggle.value;
-                hideInEditorToggle.value = !hideInEditorToggle.value;
-                keywordToggle.value = !keywordToggle.value;
-                licenseToggle.value = !licenseToggle.value;
-                licenseURLToggle.value = !licenseURLToggle.value;
-                sampleToggle.value = !sampleToggle.value;
-                typeToggle.value = !typeToggle.value;
-                unityReleaseToggle.value = !unityReleaseToggle.value;
+                m_LogURLToggleField.value = !m_LogURLToggleField.value;
+                m_DependenciesToggleField.value = !m_DependenciesToggleField.value;
+                m_DocumentURLToggleField.value = !m_DocumentURLToggleField.value;
+                //m_HideInEditorToggleField.value = !m_HideInEditorToggleField.value;
+                m_KeywordToggleField.value = !m_KeywordToggleField.value;
+                m_LicenseToggleField.value = !m_LicenseToggleField.value;
+                m_LicenseURLToggleField.value = !m_LicenseURLToggleField.value;
+                m_SamplesToggleField.value = !m_SamplesToggleField.value;
+                m_TypeToggleField.value = !m_TypeToggleField.value;
+                m_UnityReleaseToggleField.value = !m_UnityReleaseToggleField.value;
             };
         }
         #endregion
@@ -553,6 +650,102 @@ public class PackageJsonCreator : EditorWindow
             m_FolderField.value = Path.GetDirectoryName(fullPath);
             m_FileField.value = Path.GetFileName(fullPath);
 
+            string json = File.ReadAllText(m_FolderField.value + "//" + m_FileField.value);
+            sDataWrapper data = JsonUtility.FromJson<sDataWrapper>(json);
+
+            #region Require Element
+            m_PackageNameToggleField.value = (string.IsNullOrEmpty(data.name) == false);
+            if (m_PackageNameToggleField.value)
+                m_PackageNameField.value = data.name;
+
+            m_PackageVersionToggleField.value = (string.IsNullOrEmpty(data.version) == false);
+            if(m_PackageVersionToggleField.value)
+                m_PackageVersionField.value = data.version;
+            #endregion
+
+            #region Recommand Element
+            m_DescriptionToggleField.value = (string.IsNullOrEmpty(data.description) == false);
+            if (m_DescriptionToggleField.value)
+                m_DescriptionField.value = data.description;
+
+            m_DisplayToggleField.value = (string.IsNullOrEmpty(data.displayName) == false);
+            if (m_DisplayToggleField.value)
+                m_DisplayField.value = data.displayName;
+
+            m_UnityVersionToggleField.value = (string.IsNullOrEmpty(data.unity) == false);
+            if (m_UnityVersionToggleField.value)
+                m_UnityVersionField.value = data.unity;
+            #endregion
+
+            #region Optional Element
+            m_AuthorNameToggleField.value = (string.IsNullOrEmpty(data.author.name) == false);
+            if(m_AuthorNameToggleField.value)
+                m_AuthorNameField.value = data.author.name;
+
+            m_AuthorEmailToggleField.value = (string.IsNullOrEmpty(data.author.email) == false);
+            if (m_AuthorEmailToggleField.value)
+                m_AuthorEmailField.value = data.author.email;
+
+            m_AuthorURLToggleField.value = (string.IsNullOrEmpty(data.author.url) == false);
+            if (m_AuthorURLToggleField.value)
+                m_AuthorURLField.value = data.author.url;
+
+            m_LogURLToggleField.value = (string.IsNullOrEmpty(data.changelogUrl) == false);
+            if (m_LogURLToggleField.value)
+                m_LogURLField.value = data.changelogUrl;
+
+            m_DependenciesToggleField.value = (data.dependencies.Count > 0);
+            if(m_DependenciesToggleField.value)
+            {
+                m_Dependencies.Clear();
+                foreach(var item in data.dependencies)
+                {
+                    DependencyItem newItem = new DependencyItem();
+                    newItem.Convert(item);
+                    m_Dependencies.Add(newItem);
+                }
+            }
+
+            m_DocumentURLToggleField.value = (string.IsNullOrEmpty(data.documentationUrl) == false);
+            if(m_DocumentURLToggleField.value)
+                m_DocumentURLField.value = data.documentationUrl;
+
+            //m_HideInEditorToggleField.value = data.hideInEditor;
+            //m_HideInEditorField.value = data.hideInEditor;
+
+            m_KeywordToggleField.value = (string.IsNullOrEmpty(data.keywords) == false);
+            if(m_KeywordToggleField.value)
+                m_KeywordField.value = data.keywords;
+
+            m_LicenseToggleField.value = (string.IsNullOrEmpty(data.license) == false);
+            if(m_LicenseToggleField.value)
+                m_LicenseField.value = data.license;
+
+            m_LicenseURLToggleField.value = (string.IsNullOrEmpty(data.licensesUrl) == false);
+            if(m_LicenseURLToggleField.value)
+                m_LicenseURLField.value= data.licensesUrl;
+
+            m_SamplesToggleField.value = (data.samples.Count > 0);
+            if(m_SamplesToggleField.value)
+            {
+                m_Samples.Clear();
+                foreach(var item in data.samples)
+                {
+                    SampleItem newItem = new SampleItem();
+                    newItem.Convert(item);;
+                    m_Samples.Add(newItem);
+                }
+                m_SampleField.Rebuild();
+            }
+
+            m_TypeToggleField.value = (string.IsNullOrEmpty(data.type) == false);
+            if(m_TypeToggleField.value)
+                m_TypeField.value = data.type;
+
+            m_UnityReleaseToggleField.value = (string.IsNullOrEmpty (data.unityRelease) == false);
+            if(m_UnityReleaseToggleField.value)
+                m_UnityReleaseField.value = data.unityRelease;
+            #endregion
         }
         else
         {
@@ -620,11 +813,13 @@ public class PackageJsonCreator : EditorWindow
             AppendStringEndGroupItem(sb);
         }
 
-        if (m_DocumentToggle)
+        if (m_DocumentURLToggle)
             AppendStringItem(sb, "documentationUrl", m_DocumentURL);
 
+        /*
         if (m_HideInEditorToggle)
             AppendBoolItem(sb, "hideInEditor", m_HideInEditor);
+        */
 
         if (m_KeywordToggle)
         {
