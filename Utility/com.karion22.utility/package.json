@@ -1,28 +1,10 @@
 {
 "name": "com.karion22.utility",
 "version": "0.0.1",
-"description": "Description_Example",
+"description": "CutstomUtility",
 "displayName": "CustomUtility",
 "unity": "2019.2",
 "author":{
-"name": "Author_Exam_Name",
-"email": "Author_Exam_Email",
-"url": "Author_Exam_URL"
-},
-"changelogUrl": "ChangeLog_URL",
-"documentationUrl": "Document_URL",
-"keywords":[
-"word1",
-"word2"
-],
-"license": "MIT",
-"licensesUrl": "MIT.com",
-"samples":[
-{
-"displayName": "Test",
-"description": "2",
-"path": "Test"}
-],
-"type": "Tesss",
-"unityRelease": "6f1"
+"name": "karion22"
+}
 }

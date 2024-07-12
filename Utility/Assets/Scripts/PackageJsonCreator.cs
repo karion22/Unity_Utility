@@ -732,7 +732,7 @@ public class PackageJsonCreator : EditorWindow
             //m_HideInEditorToggleField.value = data.hideInEditor;
             //m_HideInEditorField.value = data.hideInEditor;
 
-            m_KeywordToggleField.value = (data.keywords.Length > 0);
+            m_KeywordToggleField.value = (data.keywords != null && data.keywords.Length > 0);
             if(m_KeywordToggleField.value)
             {
                 StringBuilder keywordBuilder = new StringBuilder();
