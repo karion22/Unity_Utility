@@ -1,4 +1,5 @@
 using System.Text;
+using UnityEditor.Search;
 using UnityEngine;
 
 namespace KRN.Utility
@@ -76,6 +77,14 @@ namespace KRN.Utility
 
                 array[i] = inCurrent.FindEx<T>(szTemp);
             }
+        }
+
+        public static T GetOrAddComponent<T>(this GameObject inGameObject) where T : Component
+        {
+            T res = inGameObject.GetComponent<T>();
+            if(res == null)
+                res = inGameObject.AddComponent<T>();
+            return res;
         }
     }
 }
