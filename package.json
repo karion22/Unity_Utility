@@ -1,10 +1,14 @@
 {
-"name": "com.karion22.utility",
-"version": "0.0.1",
-"description": "CutstomUtility",
-"displayName": "CustomUtility",
-"unity": "2019.2",
-"author":{
-"name": "karion22"
-}
+  "name": "com.karion22.utility",
+  "version": "0.0.1",
+  "displayName": "CustomUtility",
+  "description": "Singleton, Utility Etc...",  
+  "unity": "2019.2",
+  "author":{
+    "name": "karion22"
+    }
+  "repository": {
+    "type": "git",
+    "url" : "https://github.com/karion22/Unity_Utility.git"
+  }
 }
