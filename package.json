@@ -1,7 +1,7 @@
 {
   "name": "com.karion22.utility",
-  "version": "0.0.2",
-  "displayName": "CustomUtility",
+  "version": "0.0.3",
+  "displayName": "Karion Utility",
   "description": "Singleton, Utility Etc...\nusing with C# 8.0 expression",
   "unity": "2020.2",
   "author": {
