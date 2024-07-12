@@ -11,3 +11,6 @@
  - DebugLog : 유니티 에디터에 로그를 남기는 커스텀 디버그 로그 함수
  - Singleton : 싱글턴 객체를 처리 함수.
  - Utility : 공용으로 사용하는 유틸리티 함수 모음
+
+## 주의 사항
+ - DebugLog에서 로그를 표시하기 위해서는 [Project Settings] - [Player] - [Script Compilation]에서 "ENABLE_LOG"를 추가해야한다.
