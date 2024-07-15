@@ -1,3 +1,14 @@
 {
-	"name": "karionutility_assembly"
+    "name": "karionutility_assembly",
+    "rootNamespace": "KRN.Utility",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
