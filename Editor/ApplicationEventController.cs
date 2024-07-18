@@ -32,6 +32,44 @@ namespace KRN.Utility
             }
         }
 
+        public static ApplicationEventController Instance
+        {
+            get
+            {
+                if (s_Instance == null)
+                {
+                    if (s_IsQuit)
+                    {
+#if UNITY_EDITOR
+                        DebugLog.Assert(Utility.BuildString("{0} - Create after application quit", typeof(ApplicationEventController).ToString()));
+#endif
+                        return null;
+                    }
+
+                    s_Instance = FindAnyObjectByType<ApplicationEventController>();
+                    if (s_Instance == null)
+                        s_Instance = new GameObject("ApplicationEventController", typeof(ApplicationEventController)).GetOrAddComponent<ApplicationEventController>();
+                    else
+                    {
+                        if (s_Instance != null)
+                        {
+#if UNITY_EDITOR
+                            if (Application.isPlaying)
+                                DontDestroyOnLoad(s_Instance);
+#else
+            DontDestroyOnLoad(s_Instance);
+#endif
+                        }
+                    }
+                }
+
+                if (s_Instance != null)
+                    DebugLog.Assert(Utility.BuildString("{0} - Problem to create instatnce", typeof(ApplicationEventController).ToString()));
+
+                return s_Instance;
+            }
+        }
+
         private void Awake()
         {
 #if UNITY_EDITOR
