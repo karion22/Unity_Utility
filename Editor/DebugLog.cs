@@ -63,9 +63,7 @@ namespace KRN.Utility
             s_Sb.Length = 0;
 
             // 색상 정보 열기
-            s_Sb.Append("<color=");
-            s_Sb.Append(GetColor(inColor));
-            s_Sb.Append('>');
+            Print_StartColor(inColor);
 
             // 메시지를 발생시킨 화면 정보
             s_Sb.Append('[');
@@ -79,7 +77,7 @@ namespace KRN.Utility
                 s_Sb.Append("[Error] ");
 
             // 색상 정보 닫기
-            s_Sb.Append("</color>");
+            Print_EndColor();
 
             // 가공된 메시지를 유니티 디버그에 전달
             if(inType == eLogType.Default)
@@ -88,6 +86,20 @@ namespace KRN.Utility
                 UnityEngine.Debug.LogWarning(s_Sb.ToString());
             else
                 UnityEngine.Debug.LogError(s_Sb.ToString());
+        }
+
+        [Conditional(LOG_DEFINE_SYMBOL)]
+        public static void Print_StartColor(eLogColor inColor)
+        {
+            s_Sb.Append("<color=");
+            s_Sb.Append(GetColor(inColor));
+            s_Sb.Append('>');
+        }
+
+        [Conditional(LOG_DEFINE_SYMBOL)]
+        public static void Print_EndColor()
+        {
+            s_Sb.Append("</color>");
         }
     }
 }
