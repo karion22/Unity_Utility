@@ -8,6 +8,10 @@
 
 ## 구성
  - ApplicationEventController : 유니티 윈도우에서 발생하는 일시정지/종료 이벤트 등에 대한 처리 함수
+   1) onApplicationPlayed : EditorApplication PlayMode 진입 이벤트 처리 함수
+   2) AonpplicationPaused<bool> : EditorApplication 일시 정지, 재실행 이벤트 처리 함수
+   3) onApplicationQuited : EditorApplication 종료 이벤트 처리 함수
+   4) onApplicationSizeChanged<Vector2> : 어플리케이션 윈도우 사이즈가 변경 이벤트 처리 함수
  - DebugLog : 유니티 에디터에 로그를 남기는 커스텀 디버그 로그 함수
  - Singleton : 싱글턴 객체를 처리 함수.
  - Utility : 공용으로 사용하는 유틸리티 함수 모음
