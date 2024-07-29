@@ -1,6 +1,6 @@
 {
   "name": "com.karion22.utility",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "displayName": "Karion Utility",
   "description": "Singleton, Utility Etc...\nusing with C# 8.0 expression",
   "unity": "2020.2",
@@ -10,5 +10,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/karion22/Unity_Utility.git"
+  },
+  "dependencies": {
+    "com.unity.addressables": "1.21.21"
   }
 }
