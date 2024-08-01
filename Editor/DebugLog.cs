@@ -76,11 +76,14 @@ namespace KRN.Utility
             else if (inType == eLogType.Error)
                 s_Sb.Append("[Error] ");
 
+            // 내용 적용
+            s_Sb.Append(inMessage);
+
             // 색상 정보 닫기
             Print_EndColor();
 
             // 가공된 메시지를 유니티 디버그에 전달
-            if(inType == eLogType.Default)
+            if (inType == eLogType.Default)
                 UnityEngine.Debug.Log(s_Sb.ToString());
             else if(inType == eLogType.Warning)
                 UnityEngine.Debug.LogWarning(s_Sb.ToString());

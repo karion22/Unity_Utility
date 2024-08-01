@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Text;
 using UnityEngine;
 
@@ -12,6 +14,22 @@ namespace KRN.Utility
             m_StrBuilder.Length = 0;
             m_StrBuilder.AppendFormat(inFormat, inArgs);
             return m_StrBuilder.ToString();
+        }
+
+        public static string CommaString(int inValue)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0:N0}", inValue);
+        }
+
+        public static string IntToString(int inValue)
+        {
+            return null;
+        }
+
+        public static string IntToString(int inValue, string inCulture)
+        {
+
+            return null;
         }
 
         public static Transform FindEx(this Transform inCurrent, string inName)
