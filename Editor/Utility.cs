@@ -16,20 +16,45 @@ namespace KRN.Utility
             return m_StrBuilder.ToString();
         }
 
-        public static string CommaString(int inValue)
+        public static string CommaFormat(int inValue)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:N0}", inValue);
         }
 
-        public static string IntToString(int inValue)
+        public static string CommaFormat(FormattableString inSource, string inCulture)
         {
-            return null;
+            return string.Format(CultureInfo.CreateSpecificCulture(inCulture), inSource.Format, inSource.GetArgument(0));
         }
 
-        public static string IntToString(int inValue, string inCulture)
+        public static string GetSpecificCulture(string inNationName, CultureTypes inType = CultureTypes.AllCultures)
         {
+            var cultures = CultureInfo.GetCultures(inType);
 
-            return null;
+            foreach (var culture in cultures)
+            {
+                if (culture.EnglishName.Contains(inNationName) == false) continue;
+
+                try
+                {
+                    CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture(culture.Name);
+                    return cultureInfo.Name;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+            return string.Empty;
+        }
+
+        public static string GetConvertDate(DateTime inDateTime, string inFormat = "yyyy/mm/dd")
+        {
+            return inDateTime.ToString(inFormat);
+        }
+
+        public static string GetCurrentDate(string inFormat = "yyyy/mm/dd")
+        {
+            return System.DateTime.Now.ToString(inFormat);
         }
 
         public static Transform FindEx(this Transform inCurrent, string inName)
