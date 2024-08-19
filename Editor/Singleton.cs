@@ -29,7 +29,7 @@ namespace KRN.Utility
                         CreateInstance(s_Instance);
                 }
 
-                if (s_Instance != null)
+                if (s_Instance == null)
                     DebugLog.Assert(Utility.BuildString("{0} - Problem to create instatnce", typeof(T).ToString()));
 
                 return s_Instance;
