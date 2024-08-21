@@ -17,7 +17,7 @@ namespace KRN.Utility
         public static UnityAction onApplicationQuited = null;
         public static UnityAction<Vector2> onApplicationSizeChanged = null;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod]
         private static void ApplicationEventController_Init()
         {
             if (!Application.isPlaying) return;
@@ -26,25 +26,34 @@ namespace KRN.Utility
             if(s_Instance == null)
             {
                 GameObject go = new GameObject("ApplicationEventController");
-                go.hideFlags = HideFlags.HideAndDontSave;
                 s_Instance = go.AddComponent<ApplicationEventController>();
                 GameObject.DontDestroyOnLoad(go);
             }
+#if UNITY_EDITOR
+            EditorApplication.playModeStateChanged -= EditorApplication_playModeStateChanged;
+            EditorApplication.pauseStateChanged -= EditorApplication_pauseStateChanged;
+#else
+            Application.quitting -= OnQuit;
+#endif
         }
 
-        private void Awake()
+        private void Start()
         {
+            s_WindowSize = new Vector2(Screen.width, Screen.height);
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += EditorApplication_playModeStateChanged;
             EditorApplication.pauseStateChanged += EditorApplication_pauseStateChanged;
+#else
+            onApplicationPlayed?.Invoke();
+            Application.quitting += OnQuit;
 #endif
-            s_WindowSize = new Vector2(Screen.width, Screen.height);
         }
 
 #if UNITY_EDITOR
         private static void EditorApplication_playModeStateChanged(PlayModeStateChange inPlayModeState)
         {
-            switch(inPlayModeState)
+            Debug.Log(inPlayModeState.ToString());
+            switch (inPlayModeState)
             {
                 case PlayModeStateChange.EnteredPlayMode:
                     onApplicationPlayed?.Invoke();
@@ -53,9 +62,6 @@ namespace KRN.Utility
                 case PlayModeStateChange.ExitingPlayMode:
                     {
                         s_IsQuit = true;
-
-                        EditorApplication.playModeStateChanged -= EditorApplication_playModeStateChanged;
-                        EditorApplication.pauseStateChanged -= EditorApplication_pauseStateChanged;
                         onApplicationQuited?.Invoke();
                     }
                     break;
@@ -69,6 +75,11 @@ namespace KRN.Utility
 
             s_IsPause = (inPauseState == PauseState.Paused);
             onApplicationPaused?.Invoke(s_IsPause);
+        }
+#else
+        private static void OnQuit()
+        {
+            onApplicationQuited?.Invoke();
         }
 #endif
 
